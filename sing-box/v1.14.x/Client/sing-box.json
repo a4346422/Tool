@@ -189,7 +189,7 @@
                     "direct","proxy"
                 ],
                 "type": "remote", "format": "source",
-                "url": "https://raw.githubusercontent.com/a4346422/Tool/refs/heads/X/sing-box/Rules/{tag}.json"
+                "url": "https://raw.githubusercontent.com/a4346422/Tool/X/sing-box/Rules/{tag}.json"
             }
         ],
         "rules": [
