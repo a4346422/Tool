@@ -183,6 +183,13 @@
                 ],
                 "type": "remote", "format": "binary",
                 "url": "https://github.com/Repcz/Tool/raw/X/sing-box/Rules/{tag}.srs"
+            },
+            {
+                "tag": [
+                    "direct","proxy"
+                ],
+                "type": "remote", "format": "source",
+                "url": "https://raw.githubusercontent.com/a4346422/Tool/refs/heads/X/sing-box/Rules/{tag}.json"
             }
         ],
         "rules": [
@@ -192,6 +199,8 @@
             {"clash_mode": "Direct","action": "route","outbound": "Direct"},
             {"clash_mode": "Global","action": "route","outbound": "Manual"},
             {"rule_set": ["Reject"],"action": "reject"},
+            {"rule_set": ["direct"],"action": "route","outbound": "Direct"},
+            {"rule_set": ["proxy"],"action": "route","outbound": "Manual"},
             {"rule_set": ["AI"],"action": "route","outbound": "AI"},
             {"rule_set": ["Telegram"],"action": "route","outbound": "Telegram"},
             {"type": "logical","mode": "and","rules": [{"inbound": ["telegram-socks"]},{"rule_set": ["Telegram"],"invert": true}],"action": "reject"},
@@ -203,7 +212,7 @@
             {"rule_set": ["Spotify"],"action": "route","outbound": "Spotify"},
             {"rule_set": ["Bahamut","Netflix","Disney","PrimeVideo","HBO"],"action": "route","outbound": "Streaming"},
             {"rule_set": ["Proxy"],"action": "route","outbound": "Manual"},
-            {"rule_set": ["AppleProxy"],"action": "route","outbound": "HongKong"},
+            {"rule_set": ["AppleProxy"],"action": "route","outbound": "Manual"},
             {"action": "resolve"},
             {"rule_set": ["ChinaDomain","ChinaIP"],"action": "route","outbound": "Direct"}
         ],
