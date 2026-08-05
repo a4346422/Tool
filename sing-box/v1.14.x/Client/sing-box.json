@@ -51,7 +51,14 @@
         {"tag": "United States","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
         {"tag": "Singapore","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
         {"tag": "Japan","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {"tag": "Taiwan","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true}
+        {"tag": "Taiwan","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
+        {
+          "tag": "Other",
+          "type": "urltest",
+          "outbounds": [],
+          "url": "http://1.1.1.1/generate_204",
+          "interval": "3m"
+        }
     ],
     "route": {
         "rule_set": [
