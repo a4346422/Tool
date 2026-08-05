@@ -1,0 +1,9 @@
+{
+  "version": 4,
+  "rules": [
+    {
+      "domain": ["hybgzs.com"],
+      "domain_suffix": ["hybgzs.com"]
+    }
+  ]
+}
