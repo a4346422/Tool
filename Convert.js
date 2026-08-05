@@ -1,246 +1,409 @@
 /**
 
-* Sub-Store sing-box v1.14.x 自定义模板转换脚本
+* Sub-Store sing-box v1.14.x 自定义模板脚本
+*
+* 固定模板：
+* https://raw.githubusercontent.com/a4346422/Tool/refs/heads/X/sing-box/v1.14.x/Client/sing-box.json
 *
 * 功能：
-* 1. 读取当前文件中的 sing-box JSON 模板
-* 2. 获取指定订阅并转换为 sing-box 节点
-* 3. 将所有节点添加到顶层 outbounds
-* 4. 将所有节点添加到 Auto、Manual 和所有业务策略组
+* 1. 下载固定 sing-box 模板
+* 2. 读取 Sub-Store 订阅
+* 3. 转换为 sing-box 节点
+* 4. 所有节点加入 Auto
+* 5. 所有节点直接加入 Manual、AI、Google 等策略组
+* 6. 不进行地区分类
 *
 * 参数：
-* name=订阅名称
-* type=0 或不填：普通订阅
-* type=1 或 collection：组合订阅
 *
-* 示例：
-* script.js#name=serv00
+* 使用 Sub-Store 已保存的订阅：
+* #name=订阅名称
 *
-* 组合订阅：
-* script.js#name=我的组合订阅&type=1
+* 使用组合订阅：
+* #type=组合订阅&name=组合订阅名称
+*
+* 直接使用订阅 URL：
+* #url=订阅链接
+*
+* 可选：
+* &includeUnsupportedProxy=true
   */
 
-log("开始执行");
+// =================================================
+// ① 固定模板地址
+// =================================================
+
+const TEMPLATE_URL =
+"https://raw.githubusercontent.com/a4346422/Tool/refs/heads/X/sing-box/v1.14.x/Client/sing-box.json";
+
+// =================================================
+// ② 获取脚本参数
+// =================================================
 
 let {
-name,
 type,
-includeUnsupportedProxy,
-url
+name,
+url,
+includeUnsupportedProxy
 } = $arguments;
 
-// ==============================
-// ① 解析当前模板
-// ==============================
+type =
+/^1$|col|组合/i.test(type)
+? "collection"
+: "subscription";
 
-const parser = ProxyUtils.JSON5 || JSON;
+function log(message) {
+console.log(
+`[自定义 sing-box v1.14 模板] ${message}`
+);
+}
+
+log("🚀 开始执行");
+
+// =================================================
+// ③ 下载固定模板
+// =================================================
+
+log(`① 下载模板：${TEMPLATE_URL}`);
+
+let templateResponse;
+
+try {
+
+templateResponse =
+await $http.get({
+url: TEMPLATE_URL
+});
+
+} catch (error) {
+
+throw new Error(
+`下载模板失败：${error.message ?? error}`
+);
+
+}
+
+const templateText =
+templateResponse.body;
+
+if (!templateText) {
+
+throw new Error(
+"模板下载成功，但模板内容为空"
+);
+
+}
+
+const parser =
+ProxyUtils.JSON5 || JSON;
 
 let config;
 
 try {
-config = parser.parse($content ?? $files[0]);
+
+config =
+parser.parse(templateText);
+
 } catch (error) {
+
 throw new Error(
-`模板不是合法的 JSON/JSON5：${error.message ?? error}`
+`模板不是合法 JSON/JSON5：${error.message ?? error}`
 );
+
 }
 
-if (!Array.isArray(config.outbounds)) {
+if (
+!Array.isArray(
+config.outbounds
+)
+) {
+
 config.outbounds = [];
+
 }
 
-// ==============================
-// ② 获取订阅节点
-// ==============================
+log(
+`模板加载成功，原始 outbounds：${config.outbounds.length}`
+);
 
-type = /^1$|col|组合/i.test(type)
-? "collection"
-: "subscription";
+// =================================================
+// ④ 获取订阅并转换为 sing-box
+// =================================================
 
-let data;
+log("② 获取订阅节点");
+
+let artifact;
 
 if (url) {
 
-log(`从 URL 获取订阅：${url}`);
+log(
+`从 URL 读取订阅`
+);
 
-data = await produceArtifact({
-name,
-type,
-platform: "sing-box",
+artifact =
+await produceArtifact({
 
 ```
-produceOpts: {
-  "include-unsupported-proxy":
-    includeUnsupportedProxy
-},
+  name:
+    name || "Remote Subscription",
 
-subscription: {
-  name,
-  url,
-  source: "remote"
-}
-```
+  type,
+
+  platform:
+    "sing-box",
+
+  produceOpts: {
+
+    "include-unsupported-proxy":
+      includeUnsupportedProxy
+
+  },
+
+  subscription: {
+
+    name:
+      name || "Remote Subscription",
+
+    url,
+
+    source:
+      "remote"
+
+  }
 
 });
+```
 
 } else {
 
 if (!name) {
+
+```
 throw new Error(
-"缺少订阅名称，请在脚本参数中设置 name"
+  "缺少订阅参数。请设置 name，或者设置 url"
 );
+```
+
 }
 
 log(
 `读取${type === "collection" ? "组合" : ""}订阅：${name}`
 );
 
-data = await produceArtifact({
-name,
-type,
-platform: "sing-box",
+artifact =
+await produceArtifact({
 
 ```
-produceOpts: {
-  "include-unsupported-proxy":
-    includeUnsupportedProxy
-}
-```
+  name,
+
+  type,
+
+  platform:
+    "sing-box",
+
+  produceOpts: {
+
+    "include-unsupported-proxy":
+      includeUnsupportedProxy
+
+  }
 
 });
+```
 
 }
 
-data = JSON.parse(data);
+// =================================================
+// ⑤ 解析转换后的节点
+// =================================================
 
-// sing-box 转换结果
-const proxyOutbounds =
-Array.isArray(data.outbounds)
-? data.outbounds
+let subscriptionConfig;
+
+try {
+
+subscriptionConfig =
+JSON.parse(artifact);
+
+} catch (error) {
+
+throw new Error(
+`订阅转换结果不是合法 JSON：${error.message ?? error}`
+);
+
+}
+
+const sourceOutbounds =
+Array.isArray(
+subscriptionConfig.outbounds
+)
+? subscriptionConfig.outbounds
 : [];
 
-const endpoints =
-Array.isArray(data.endpoints)
-? data.endpoints
+const sourceEndpoints =
+Array.isArray(
+subscriptionConfig.endpoints
+)
+? subscriptionConfig.endpoints
 : [];
 
-const proxies = [
-...proxyOutbounds,
-...endpoints
+const sourceProxies = [
+
+...sourceOutbounds,
+
+...sourceEndpoints
+
 ];
 
-if (proxies.length === 0) {
+if (
+sourceProxies.length === 0
+) {
+
 throw new Error(
-"没有获取到可用节点，请检查 name 是否与 Sub-Store 中的订阅名称完全一致"
+"没有获取到可用节点"
 );
+
 }
 
-log(
-`获取节点：${proxyOutbounds.length} 个`
-);
+const nodeTags = [
 
-if (endpoints.length > 0) {
-log(
-`获取 endpoints：${endpoints.length} 个`
-);
-}
+...new Set(
 
-// ==============================
-// ③ 获取所有节点标签
-// ==============================
+```
+sourceProxies
 
-const nodeTags = proxies
-.map(proxy => proxy.tag)
-.filter(Boolean);
+  .map(
+    node => node.tag
+  )
 
-if (nodeTags.length === 0) {
-throw new Error(
-"节点没有有效的 tag"
-);
-}
+  .filter(Boolean)
+```
 
-// 去重
-const uniqueNodeTags = [
-...new Set(nodeTags)
+)
+
 ];
 
-log(
-`有效节点标签：${uniqueNodeTags.length} 个`
+if (
+nodeTags.length === 0
+) {
+
+throw new Error(
+"订阅节点没有有效 tag"
 );
 
-// ==============================
-// ④ 查找策略组
-// ==============================
+}
+
+log(
+`获取 ${sourceOutbounds.length} 个节点`
+);
+
+if (
+sourceEndpoints.length > 0
+) {
+
+log(
+`获取 ${sourceEndpoints.length} 个 endpoint`
+);
+
+}
+
+log(
+`有效节点标签：${nodeTags.length}`
+);
+
+// =================================================
+// ⑥ 查找模板策略组
+// =================================================
 
 function findOutbound(tag) {
 
 return config.outbounds.find(
-outbound => outbound.tag === tag
+
+```
+outbound =>
+
+  outbound.tag === tag
+```
+
 );
 
 }
 
-// ==============================
-// ⑤ 更新 Auto
-// ==============================
+// =================================================
+// ⑦ 更新 Auto
+// =================================================
 
-const auto = findOutbound("Auto");
+const auto =
+findOutbound("Auto");
 
 if (!auto) {
 
 throw new Error(
-'模板中没有找到 tag 为 "Auto" 的 outbound'
+'模板中没有找到 "Auto" 策略组'
 );
 
 }
 
-if (
-auto.type !== "urltest"
-) {
+/*
 
-log(
-`警告：Auto 当前类型是 ${auto.type}，不是 urltest`
-);
+* Auto：
+*
+* 节点1
+* 节点2
+* 节点3
+  */
 
-}
-
-// Auto 只放实际节点
 auto.outbounds = [
-...uniqueNodeTags
+
+...nodeTags
+
 ];
 
 log(
-`Auto 已添加 ${uniqueNodeTags.length} 个节点`
+`Auto 已加入 ${nodeTags.length} 个节点`
 );
 
-// ==============================
-// ⑥ 更新 Manual
-// ==============================
+// =================================================
+// ⑧ 更新 Manual
+// =================================================
 
-const manual = findOutbound("Manual");
+const manual =
+findOutbound("Manual");
 
 if (!manual) {
 
 throw new Error(
-'模板中没有找到 tag 为 "Manual" 的 outbound'
+'模板中没有找到 "Manual" 策略组'
 );
 
 }
 
-// Manual：Auto + 所有节点 + Direct
+/*
+
+* Manual：
+*
+* Auto
+* 节点1
+* 节点2
+* 节点3
+* Direct
+  */
+
 manual.outbounds = [
+
 "Auto",
-...uniqueNodeTags,
+
+...nodeTags,
+
 "Direct"
+
 ];
 
 log(
-`Manual 已添加所有节点`
+"Manual 已加入 Auto、全部节点和 Direct"
 );
 
-// ==============================
-// ⑦ 更新业务策略组
-// ==============================
+// =================================================
+// ⑨ 更新业务策略组
+// =================================================
 
 const serviceGroups = [
 
@@ -267,17 +430,20 @@ const serviceGroups = [
 ];
 
 for (
-const groupTag of serviceGroups
+const groupTag
+of serviceGroups
 ) {
 
 const group =
-findOutbound(groupTag);
+findOutbound(
+groupTag
+);
 
 if (!group) {
 
 ```
 log(
-  `模板中没有找到 ${groupTag}，跳过`
+  `未找到 ${groupTag}，跳过`
 );
 
 continue;
@@ -291,7 +457,9 @@ continue;
 *
 * Manual
 * Auto
-* 所有实际节点
+* 节点1
+* 节点2
+* 节点3
 * Direct
   */
 
@@ -302,7 +470,7 @@ group.outbounds = [
 
 "Auto",
 
-...uniqueNodeTags,
+...nodeTags,
 
 "Direct"
 ```
@@ -310,73 +478,72 @@ group.outbounds = [
 ];
 
 log(
-`${groupTag} 已添加所有节点`
+`${groupTag} 已加入全部节点`
 );
 
 }
 
-// ==============================
-// ⑧ 添加实际节点定义
-// ==============================
+// =================================================
+// ⑩ 添加真实节点定义
+// =================================================
 
 /*
 
-* 模板原本只有：
+* selector/urltest 中只能引用节点 tag。
 *
-* Direct
-* Manual
-* AI
-* Google
-* ...
-* Auto
-*
-* 这里把订阅转换出来的真实节点
-* 追加到顶层 outbounds。
+* 实际节点配置仍必须追加到
+* 顶层 config.outbounds。
   */
 
-const templateTags =
+const existingTags =
+
 new Set(
 
 ```
 config.outbounds
+
   .map(
-    outbound => outbound.tag
+    outbound =>
+      outbound.tag
   )
+
   .filter(Boolean)
 ```
 
 );
 
-const newProxies =
+const newOutbounds =
 
-proxies.filter(
+sourceOutbounds.filter(
 
 ```
-proxy =>
+outbound =>
 
-  proxy.tag &&
+  outbound.tag &&
 
-  !templateTags.has(
-    proxy.tag
+  !existingTags.has(
+    outbound.tag
   )
 ```
 
 );
 
 config.outbounds.push(
-...newProxies
+
+...newOutbounds
+
 );
 
 log(
-`已添加 ${newProxies.length} 个实际节点到顶层 outbounds`
+`顶层 outbounds 已添加 ${newOutbounds.length} 个真实节点`
 );
 
-// ==============================
-// ⑨ 添加 endpoints
-// ==============================
+// =================================================
+// ⑪ 添加 endpoints
+// =================================================
 
 if (
-endpoints.length > 0
+sourceEndpoints.length > 0
 ) {
 
 if (
@@ -391,16 +558,18 @@ config.endpoints = [];
 
 }
 
-const endpointTags =
+const existingEndpointTags =
 
 ```
 new Set(
 
   config.endpoints
+
     .map(
       endpoint =>
         endpoint.tag
     )
+
     .filter(Boolean)
 
 );
@@ -409,13 +578,13 @@ new Set(
 const newEndpoints =
 
 ```
-endpoints.filter(
+sourceEndpoints.filter(
 
   endpoint =>
 
     endpoint.tag &&
 
-    !endpointTags.has(
+    !existingEndpointTags.has(
       endpoint.tag
     )
 
@@ -423,27 +592,36 @@ endpoints.filter(
 ```
 
 config.endpoints.push(
+
+```
 ...newEndpoints
+```
+
+);
+
+log(
+`已添加 ${newEndpoints.length} 个 endpoint`
 );
 
 }
 
-// ==============================
-// ⑩ 输出最终配置
-// ==============================
+// =================================================
+// ⑫ 输出最终配置
+// =================================================
 
-$content = JSON.stringify(
+$content =
+JSON.stringify(
+
+```
 config,
+
 null,
+
 2
+```
+
 );
 
-log("转换完成");
-
-function log(message) {
-
-console.log(
-`[自定义 sing-box 模板] ${message}`
+log(
+"✅ 转换完成"
 );
-
-}
