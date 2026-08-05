@@ -35,30 +35,150 @@
         "final": "ali-doh"
     },
     "outbounds": [
-        {"tag": "Direct","type": "direct"},
-        {"tag": "Manual","type": "selector","outbounds": ["HongKong","United States","Singapore","Japan","Taiwan","Direct","Other"],"default": "Direct","interrupt_exist_connections": true},
-        {"tag": "AI","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "United States","interrupt_exist_connections": true},
-        {"tag": "Google","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "United States","interrupt_exist_connections": true},
-        {"tag": "Microsoft","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "United States","interrupt_exist_connections": true},
-        {"tag": "Social","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "Telegram","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "Singapore","interrupt_exist_connections": true},
-        {"tag": "Game","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "Emby","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "Spotify","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "Streaming","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "Final","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "Manual","interrupt_exist_connections": true},
-        {"tag": "HongKong","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {"tag": "United States","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {"tag": "Singapore","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {"tag": "Japan","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {"tag": "Taiwan","type": "urltest","outbounds": [],"url": "http://1.1.1.1/generate_204","interrupt_exist_connections": true},
-        {
-          "tag": "Other",
-          "type": "urltest",
-          "outbounds": [],
-          "url": "http://1.1.1.1/generate_204",
-          "interval": "3m"
-        }
+          {
+            "tag": "Direct",
+            "type": "direct"
+          },
+        
+          {
+            "tag": "Manual",
+            "type": "selector",
+            "outbounds": [
+              "Auto",
+              "Direct"
+            ],
+            "default": "Auto",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "AI",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Google",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Microsoft",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Social",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Telegram",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Game",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Emby",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Spotify",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Streaming",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Final",
+            "type": "selector",
+            "outbounds": [
+              "Manual",
+              "Auto",
+              "Direct"
+            ],
+            "default": "Manual",
+            "interrupt_exist_connections": true
+          },
+        
+          {
+            "tag": "Auto",
+            "type": "urltest",
+            "outbounds": [],
+            "url": "http://1.1.1.1/generate_204",
+            "interval": "3m",
+            "interrupt_exist_connections": true
+          }
     ],
     "route": {
         "rule_set": [
