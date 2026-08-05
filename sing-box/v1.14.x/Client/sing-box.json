@@ -36,7 +36,7 @@
     },
     "outbounds": [
         {"tag": "Direct","type": "direct"},
-        {"tag": "Manual","type": "selector","outbounds": ["HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "Direct","interrupt_exist_connections": true},
+        {"tag": "Manual","type": "selector","outbounds": ["HongKong","United States","Singapore","Japan","Taiwan","Direct","Other"],"default": "Direct","interrupt_exist_connections": true},
         {"tag": "AI","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "United States","interrupt_exist_connections": true},
         {"tag": "Google","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan"],"default": "United States","interrupt_exist_connections": true},
         {"tag": "Microsoft","type": "selector","outbounds": ["Manual","HongKong","United States","Singapore","Japan","Taiwan","Direct"],"default": "United States","interrupt_exist_connections": true},
