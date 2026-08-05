@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": ["x.com"],
+      "domain_suffix": ["x.com"]
+    }
+  ]
+}
